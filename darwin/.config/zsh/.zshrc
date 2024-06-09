@@ -21,6 +21,9 @@ if (( ! $+commands[brew] )); then
 fi
 fpath=(/opt/homebrew/share/zsh/site-functions(N) /home/linuxbrew/.linuxbrew/share/zsh/site-functions(N) ${fpath})
 
+fpath=(${XDG_DATA_HOME}/zsh/site-functions(N) ${fpath})
+fpath=(${HOME}/.rustup/toolchains/stable-aarch64-apple-darwin/share/zsh/site-functions(N) ${fpath})
+
 # Use modern completion system
 autoload -Uz compinit
 compinit
