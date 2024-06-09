@@ -41,10 +41,18 @@ if [ -f "$HOME/.local/google-cloud-sdk/path.zsh.inc" ]; then . "$HOME/.local/goo
 # The next line enables shell command completion for gcloud.
 if [ -f "$HOME/.local/google-cloud-sdk/completion.zsh.inc" ]; then . "$HOME/.local/google-cloud-sdk/completion.zsh.inc"; fi
 
+if [ -d "$HOME/.cargo/bin" ] ; then
+    export PATH="$HOME/.cargo/bin:$PATH"
+fi
+
+if [ -d "$HOME/.local/bin" ] ; then
+    export PATH="$HOME/.local/bin:$PATH"
+fi
+
 if (( ${+commands[eza]} )); then
-  alias ls='eza --group-directories-first'
+  alias ls='eza'
 elif (( ${+commands[exa]} )); then
-  alias ls='exa --group-directories-first'
+  alias ls='exa'
 else
   alias ls='ls --color=auto'
 fi
