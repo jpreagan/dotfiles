@@ -1,5 +1,8 @@
 #!/bin/zsh
 
+if [[ ! -e "$ZDOTDIR/.zsh/conda-zsh-completion" ]]; then
+  git clone --depth=1 https://github.com/conda-incubator/conda-zsh-completion.git "$ZDOTDIR/.zsh/conda-zsh-completion"
+fi
 if [[ ! -e "$ZDOTDIR/.zsh/zsh-completions" ]]; then
   git clone --depth=1 https://github.com/zsh-users/zsh-completions.git "$ZDOTDIR/.zsh/zsh-completions"
 fi
