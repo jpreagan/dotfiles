@@ -79,4 +79,6 @@ alias ll='ls -l --color=auto'
 alias vi='nvim'
 alias vim='nvim'
 
-eval "$(starship init zsh)"
+if (( ${+commands[starship]} )); then
+  eval "$(starship init zsh)"
+fi
