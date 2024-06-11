@@ -38,7 +38,14 @@ fi
 fpath=(/opt/homebrew/share/zsh/site-functions(N) /home/linuxbrew/.linuxbrew/share/zsh/site-functions(N) ${fpath})
 
 fpath=(${XDG_DATA_HOME}/zsh/site-functions(N) ${fpath})
-fpath=(${HOME}/.rustup/toolchains/stable-aarch64-apple-darwin/share/zsh/site-functions(N) ${fpath})
+
+# Rust
+if [ -d "$HOME/.cargo/bin" ] ; then
+    export PATH="$HOME/.cargo/bin:$PATH"
+fi
+if (( $+commands[rustup] )); then
+  fpath=(${HOME}/.rustup/toolchains/stable-aarch64-apple-darwin/share/zsh/site-functions(N) ${fpath})
+fi
 
 # Use modern completion system
 autoload -Uz compinit
@@ -59,10 +66,6 @@ if [ -f "$HOME/.local/google-cloud-sdk/path.zsh.inc" ]; then . "$HOME/.local/goo
 
 # The next line enables shell command completion for gcloud.
 if [ -f "$HOME/.local/google-cloud-sdk/completion.zsh.inc" ]; then . "$HOME/.local/google-cloud-sdk/completion.zsh.inc"; fi
-
-if [ -d "$HOME/.cargo/bin" ] ; then
-    export PATH="$HOME/.cargo/bin:$PATH"
-fi
 
 if [ -d "$HOME/.local/bin" ] ; then
     export PATH="$HOME/.local/bin:$PATH"
