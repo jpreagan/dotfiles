@@ -12,8 +12,6 @@ HISTFILE=$ZDOTDIR/.zsh_history
 
 fpath=(${ZDOTDIR}/.zsh/zsh-completions/src(N) $fpath)
 
-source $ZDOTDIR/asdf.zsh
-
 # Miniconda
 __conda_setup="$("$HOME/miniconda3/bin/conda" 'shell.zsh' 'hook' 2> /dev/null)"
 if [ $? -eq 0 ]; then
@@ -46,6 +44,9 @@ fi
 if (( $+commands[rustup] )); then
   fpath=(${HOME}/.rustup/toolchains/stable-aarch64-apple-darwin/share/zsh/site-functions(N) ${fpath})
 fi
+
+# asdf
+source $ZDOTDIR/asdf.zsh
 
 # Use modern completion system
 autoload -Uz compinit
