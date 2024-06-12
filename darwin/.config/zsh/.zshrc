@@ -12,22 +12,6 @@ HISTFILE=$ZDOTDIR/.zsh_history
 
 fpath=(${ZDOTDIR}/.zsh/zsh-completions/src(N) $fpath)
 
-# Miniconda
-__conda_setup="$("$HOME/miniconda3/bin/conda" 'shell.zsh' 'hook' 2> /dev/null)"
-if [ $? -eq 0 ]; then
-    eval "$__conda_setup"
-else
-    if [ -f "$HOME/miniconda3/etc/profile.d/conda.sh" ]; then
-        . "$HOME/miniconda3/etc/profile.d/conda.sh"
-    else
-        export PATH="$HOME/miniconda3/bin:$PATH"
-    fi
-fi
-unset __conda_setup
-if (( $+commands[conda] )); then
-  source $ZDOTDIR/.zsh/conda-zsh-completion/conda-zsh-completion.plugin.zsh
-fi
-
 # Homebrew
 if (( ! $+commands[brew] )); then
   test -d /opt/homebrew/bin && eval "$(/opt/homebrew/bin/brew shellenv)"
@@ -43,6 +27,27 @@ if [ -d "$HOME/.cargo/bin" ] ; then
 fi
 if (( $+commands[rustup] )); then
   fpath=(${HOME}/.rustup/toolchains/stable-aarch64-apple-darwin/share/zsh/site-functions(N) ${fpath})
+fi
+
+# Python
+if [ -d "/Library/Frameworks/Python.framework/Versions/3.12/bin" ] ; then
+    export PATH="/Library/Frameworks/Python.framework/Versions/3.12/bin:$PATH"
+fi
+
+# Miniconda
+__conda_setup="$("$HOME/miniconda3/bin/conda" 'shell.zsh' 'hook' 2> /dev/null)"
+if [ $? -eq 0 ]; then
+    eval "$__conda_setup"
+else
+    if [ -f "$HOME/miniconda3/etc/profile.d/conda.sh" ]; then
+        . "$HOME/miniconda3/etc/profile.d/conda.sh"
+    else
+        export PATH="$HOME/miniconda3/bin:$PATH"
+    fi
+fi
+unset __conda_setup
+if (( $+commands[conda] )); then
+  source $ZDOTDIR/.zsh/conda-zsh-completion/conda-zsh-completion.plugin.zsh
 fi
 
 # asdf
@@ -79,9 +84,25 @@ elif (( ${+commands[exa]} )); then
 else
   alias ls='ls --color=auto'
 fi
+
+alias egrep='egrep --color=auto'
+alias fgrep='fgrep --color=auto'
+alias grep='grep --color=auto'
 alias ll='ls -l --color=auto'
+alias lla='ls -la --color=auto'
+alias xzegrep='xzegrep --color=auto'
+alias xzfgrep='xzfgrep --color=auto'
+alias xzgrep='xzgrep --color=auto'
+alias zegrep='zegrep --color=auto'
+alias zfgrep='zfgrep --color=auto'
+alias zgrep='zgrep --color=auto'
+
 alias vi='nvim'
 alias vim='nvim'
+
+alias py='python3'
+alias python='python3'
+alias pip='pip3'
 
 if (( ${+commands[starship]} )); then
   eval "$(starship init zsh)"
