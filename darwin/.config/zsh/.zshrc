@@ -73,6 +73,12 @@ if [ -f "$HOME/.local/google-cloud-sdk/path.zsh.inc" ]; then . "$HOME/.local/goo
 # The next line enables shell command completion for gcloud.
 if [ -f "$HOME/.local/google-cloud-sdk/completion.zsh.inc" ]; then . "$HOME/.local/google-cloud-sdk/completion.zsh.inc"; fi
 
+# Azure CLI completions
+if (( $+commands[az] )); then
+  autoload bashcompinit && bashcompinit
+  source $(brew --prefix)/etc/bash_completion.d/az
+fi
+
 if [ -d "$HOME/.local/bin" ] ; then
     export PATH="$HOME/.local/bin:$PATH"
 fi
