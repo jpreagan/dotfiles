@@ -27,7 +27,7 @@ sync_directories() {
 }
 
 # Exclusions for syncing from darwin to linux
-exclusions_darwin_to_linux=(".config/alacritty" ".config/skhd" ".local/bin/upgrade")
+exclusions_darwin_to_linux=(".config/skhd" ".local/bin/upgrade")
 
 # Exclusions for syncing from linux to darwin
 exclusions_linux_to_darwin=(".local/bin/upgrade")
