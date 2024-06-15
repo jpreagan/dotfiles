@@ -26,12 +26,15 @@ sync_directories() {
   rsync -av "${exclude_params[@]}" "$src/" "$dest/"
 }
 
-# Exclusions
-exclusions=(".config/alacritty" ".config/skhd" ".local/bin/upgrade")
+# Exclusions for syncing from darwin to linux
+exclusions_darwin_to_linux=(".config/alacritty" ".config/skhd" ".local/bin/upgrade")
+
+# Exclusions for syncing from linux to darwin
+exclusions_linux_to_darwin=(".local/bin/upgrade")
 
 # Sync from darwin to linux, excluding specified directories
-sync_directories "darwin" "linux" "${exclusions[@]}"
+sync_directories "darwin" "linux" "${exclusions_darwin_to_linux[@]}"
 
 # Sync from linux to darwin, excluding specified directories
-sync_directories "linux" "darwin" "${exclusions[@]}"
+sync_directories "linux" "darwin" "${exclusions_linux_to_darwin[@]}"
 
