@@ -79,6 +79,14 @@ if (( $+commands[az] )); then
   source $(brew --prefix)/etc/bash_completion.d/az
 fi
 
+# AWS CLI completions
+if (( $+commands[aws_completer] )); then
+  if (( ! $+functions[bashcompinit] )); then
+    autoload bashcompinit && bashcompinit
+  fi
+  complete -C aws_completer aws
+fi
+
 if [ -d "$HOME/.local/bin" ] ; then
     export PATH="$HOME/.local/bin:$PATH"
 fi
