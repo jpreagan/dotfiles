@@ -4,11 +4,16 @@
 sync_directories() {
   src=$1
   dest=$2
-  exclude1=$3
-  exclude2=$4
+  excludes=("${@:3}")
+  
+  # Build the rsync exclude parameters
+  exclude_params=()
+  for exclude in "${excludes[@]}"; do
+    exclude_params+=("--exclude=${exclude}")
+  done
   
   # Perform a dry run to detect conflicts
-  conflicts=$(rsync -nrv --exclude="$exclude1" --exclude="$exclude2" "$src/" "$dest/" | grep -E '^deleting|^[<>]f\+\+\+\+\+')
+  conflicts=$(rsync -nrv "${exclude_params[@]}" "$src/" "$dest/" | grep -E '^deleting|^[<>]f\+\+\+\+\+')
   
   if [ -n "$conflicts" ]; then
     echo "Conflicts detected between $src and $dest:"
@@ -18,12 +23,15 @@ sync_directories() {
   fi
   
   # Sync the directories if no conflicts are detected
-  rsync -av --exclude="$exclude1" --exclude="$exclude2" "$src/" "$dest/"
+  rsync -av "${exclude_params[@]}" "$src/" "$dest/"
 }
 
+# Exclusions
+exclusions=(".config/alacritty" ".config/skhd" ".local/bin/upgrade")
+
 # Sync from darwin to linux, excluding specified directories
-sync_directories "darwin" "linux" ".config/alacritty" ".config/skhd"
+sync_directories "darwin" "linux" "${exclusions[@]}"
 
 # Sync from linux to darwin, excluding specified directories
-sync_directories "linux" "darwin" ".config/alacritty" ".config/skhd"
+sync_directories "linux" "darwin" "${exclusions[@]}"
 
