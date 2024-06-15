@@ -75,7 +75,9 @@ if [ -f "$HOME/.local/google-cloud-sdk/completion.zsh.inc" ]; then . "$HOME/.loc
 
 # Azure CLI completions
 if (( $+commands[az] )); then
-  autoload bashcompinit && bashcompinit
+  if (( ! $+functions[bashcompinit] )); then
+    autoload bashcompinit && bashcompinit
+  fi
   source $(brew --prefix)/etc/bash_completion.d/az
 fi
 
