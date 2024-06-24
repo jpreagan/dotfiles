@@ -1,0 +1,40 @@
+# -*- mode: sh; mode: sh-bash -*-
+
+## This is a template for "~/.blerc".
+
+##-----------------------------------------------------------------------------
+## Basic settings
+
+bleopt input_encoding=UTF-8
+bleopt pager=less
+bleopt editor=vim
+
+##-----------------------------------------------------------------------------
+## User input settings
+
+bleopt default_keymap=vi
+ble-face auto_complete='fg=gray'
+
+##-----------------------------------------------------------------------------
+## Color settings
+
+bleopt filename_ls_colors="$LS_COLORS"
+ble-face -s command_builtin fg=green
+
+##-----------------------------------------------------------------------------
+## Keybindings
+
+ble-bind -f 'up' 'history-substring-search-backward'
+ble-bind -f 'down' 'history-substring-search-forward'
+
+function blerc/vim-load-hook {
+  ((_ble_bash>=40300)) && builtin bind 'set keyseq-timeout 1'
+  #----------------------------------------------------------------------------
+  # Settings for the mode indicator
+  bleopt keymap_vi_mode_string_nmap:=$'\e[1m-- NORMAL --\e[m'
+  #----------------------------------------------------------------------------
+  # Keybindings
+  ble-bind -m vi_nmap -f 'j' 'history-substring-search-backward'
+  ble-bind -m vi_nmap -f 'k' 'history-substring-search-forward'
+}
+blehook/eval-after-load keymap_vi blerc/vim-load-hook
