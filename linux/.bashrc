@@ -64,19 +64,30 @@ if ! shopt -oq posix; then
   fi
 fi
 
-eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
+# Homebrew
+if [ -f "/home/linuxbrew/.linuxbrew/bin/brew" ]; then
+  eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
+fi
 
-. "$HOME/.cargo/env"
+# Rust
+if [ -f "$HOME/.cargo/env" ]; then
+  . "$HOME/.cargo/env"
+fi
 
 # asdf
 if [ -f "$HOME/.asdf/asdf.sh" ]; then
   . "$HOME/.asdf/asdf.sh"
 fi
+
 if [ -f "$HOME/.asdf/completions/asdf.bash" ]; then
   . "$HOME/.asdf/completions/asdf.bash"
 fi
 
-eval "$(starship init bash)"
+# Starship
+if command -v starship &> /dev/null; then
+  eval "$(starship init bash)"
+fi
+
 
 [[ ${BLE_VERSION-} ]] && ble-attach
 
