@@ -51,7 +51,10 @@ if (( $+commands[conda] )); then
 fi
 
 # asdf
-source $ZDOTDIR/asdf.zsh
+if [ -f "$HOME/.asdf/asdf.sh" ]; then
+  . "$HOME/.asdf/asdf.sh"
+fi
+fpath=(${ASDF_DIR}/completions(N) $fpath)
 
 # Use modern completion system
 autoload -Uz compinit
