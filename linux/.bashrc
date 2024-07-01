@@ -64,12 +64,7 @@ if ! shopt -oq posix; then
   fi
 fi
 
-# Homebrew
-if [ -f "/home/linuxbrew/.linuxbrew/bin/brew" ]; then
-  eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
-fi
-
-# Rust
+# rust
 if [ -f "$HOME/.cargo/env" ]; then
   . "$HOME/.cargo/env"
 fi
@@ -95,6 +90,9 @@ else
     echo "WARNING: could not find conda-bash-completion setup script"
 fi
 
+# pipx completions
+eval "$(register-python-argcomplete pipx)"
+
 # asdf
 if [ -f "$HOME/.asdf/asdf.sh" ]; then
   . "$HOME/.asdf/asdf.sh"
@@ -103,7 +101,7 @@ if [ -f "$HOME/.asdf/completions/asdf.bash" ]; then
   . "$HOME/.asdf/completions/asdf.bash"
 fi
 
-# Starship
+# starship
 if command -v starship &> /dev/null; then
   eval "$(starship init bash)"
 fi
