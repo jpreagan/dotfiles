@@ -1,0 +1,39 @@
+#!/bin/bash
+
+# apt
+sudo apt-get update
+sudo apt-get dist-upgrade -y
+sudo apt-get clean -y
+sudo apt-get autoclean -y
+
+# ble.sh
+bash ~/.local/share/blesh/ble.sh --update
+
+# rust
+rustup upgrade
+
+# miniconda
+conda update -y -n base conda
+
+# pipx
+pipx upgrade-all
+
+# gh extensions
+gh extension upgrade --all
+
+# asdf
+asdf update
+asdf plugin update --all
+
+# npm
+npm update -g
+
+# starship
+curl -sS https://starship.rs/install.sh | sh
+
+# completions
+starship completions bash > ~/.local/share/bash-completion/completions/starship
+poetry completions bash >| ~/.local/share/bash-completion/completions/poetry
+docker completion bash >| ~/.local/share/bash-completion/completions/docker
+rustup completions bash >| ~/.local/share/bash-completion/completions/rustup
+rustup completions bash cargo >| ~/.local/share/bash-completion/completions/cargo
