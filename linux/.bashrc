@@ -115,8 +115,14 @@ if command -v starship &> /dev/null; then
   eval "$(starship init bash)"
 fi
 
+# add private bin to PATH
 if [ -d "$HOME/.local/bin" ] ; then
     PATH="$HOME/.local/bin:$PATH"
+fi
+
+# aws cli completions
+if command -v aws &> /dev/null; then
+    complete -C "$(command -v aws_completer)" aws
 fi
 
 [[ ${BLE_VERSION-} ]] && ble-attach
