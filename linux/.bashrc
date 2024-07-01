@@ -100,6 +100,11 @@ if [ -f "$HOME/.asdf/completions/asdf.bash" ]; then
   . "$HOME/.asdf/completions/asdf.bash"
 fi
 
+# nvim
+if [ -d "/opt/nvim" ] ; then
+  export PATH="$PATH:/opt/nvim"
+fi
+
 # starship
 if command -v starship &> /dev/null; then
   eval "$(starship init bash)"
@@ -110,6 +115,3 @@ if [ -d "$HOME/.local/bin" ] ; then
 fi
 
 [[ ${BLE_VERSION-} ]] && ble-attach
-
-
-
