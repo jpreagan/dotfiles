@@ -108,6 +108,10 @@ if command -v starship &> /dev/null; then
   eval "$(starship init bash)"
 fi
 
+if [ -d "$HOME/.local/bin" ] ; then
+    PATH="$HOME/.local/bin:$PATH"
+fi
+
 [[ ${BLE_VERSION-} ]] && ble-attach
 
 
