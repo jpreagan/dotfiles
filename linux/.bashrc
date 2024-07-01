@@ -21,28 +21,27 @@ HISTFILESIZE=2000
 # update the values of LINES and COLUMNS.
 shopt -s checkwinsize
 
-# enable color support of ls and also add handy aliases
-if [ -x /usr/bin/dircolors ]; then
-    test -r ~/.dircolors && eval "$(dircolors -b ~/.dircolors)" || eval "$(dircolors -b)"
-    if command -v eza &> /dev/null; then
-      alias ls='eza'
-    elif command -v exa &> /dev/null; then
-      alias ls='exa'
-    else
-      alias ls='ls --color=auto'
-    fi
-    alias dir='dir --color=auto'
-    alias vdir='vdir --color=auto'
-
-    alias grep='grep --color=auto'
-    alias fgrep='fgrep --color=auto'
-    alias egrep='egrep --color=auto'
-fi
 
 # Alias definitions.
+if command -v eza &> /dev/null; then
+  alias ls='eza'
+  alias la='ls -a'
+  alias lla='ls -la'
+elif command -v exa &> /dev/null; then
+  alias ls='exa'
+  alias la='ls -a'
+  alias lla='ls -la'
+else
+  alias ls='ls --color=auto'
+  alias la='ls -A'
+  alias lla='ls -lA'
+fi
 alias ll='ls -l'
-alias la='ls -a'
-alias lla='ls -la'
+alias dir='dir --color=auto'
+alias vdir='vdir --color=auto'
+alias grep='grep --color=auto'
+alias fgrep='fgrep --color=auto'
+alias egrep='egrep --color=auto'
 
 alias vi='nvim'
 alias vim='nvim'

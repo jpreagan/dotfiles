@@ -98,23 +98,21 @@ fi
 
 if (( ${+commands[eza]} )); then
   alias ls='eza'
+  alias la='ls -a'
+  alias lla='ls -la'
 elif (( ${+commands[exa]} )); then
   alias ls='exa'
+  alias la='ls -a'
+  alias lla='ls -la'
 else
   alias ls='ls --color=auto'
+  alias la='ls -A'
+  alias lla='ls -lA'
 fi
-
+alias ll='ls -l'
+alias grep='grep --color=auto'
 alias egrep='egrep --color=auto'
 alias fgrep='fgrep --color=auto'
-alias grep='grep --color=auto'
-alias ll='ls -l --color=auto'
-alias lla='ls -la --color=auto'
-alias xzegrep='xzegrep --color=auto'
-alias xzfgrep='xzfgrep --color=auto'
-alias xzgrep='xzgrep --color=auto'
-alias zegrep='zegrep --color=auto'
-alias zfgrep='zfgrep --color=auto'
-alias zgrep='zgrep --color=auto'
 
 alias vi='nvim'
 alias vim='nvim'
