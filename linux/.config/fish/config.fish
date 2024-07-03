@@ -53,6 +53,10 @@ if status is-interactive
         source $HOME/.asdf/asdf.fish
     end
 
+    if test -d $HOME/.local/bin
+        fish_add_path $HOME/.local/bin
+    end
+
     # Launch starship
     starship init fish | source
 end
