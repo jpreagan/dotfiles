@@ -36,7 +36,7 @@ if status is-interactive
     # <<< conda initialize <<<
 
     # The next line updates PATH for the Google Cloud SDK.
-    if [ -f '/Users/jpreagan/.local/google-cloud-sdk/path.fish.inc' ]; . '/Users/jpreagan/.local/google-cloud-sdk/path.fish.inc'; end
+    if [ -f "$HOME/.local/google-cloud-sdk/path.fish.inc" ]; . "$HOME/.local/google-cloud-sdk/path.fish.inc"; end
 
     # AWS CLI
     if command -q aws
