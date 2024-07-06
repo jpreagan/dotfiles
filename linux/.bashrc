@@ -88,13 +88,19 @@ fi
 unset __conda_setup
 # <<< conda initialize <<<
 CONDA_ROOT=~/miniconda3
-if [[ -r $CONDA_ROOT/etc/profile.d/bash_completion.sh ]]; then
-    source $CONDA_ROOT/etc/profile.d/bash_completion.sh
+if [[ -r "${CONDA_ROOT}/etc/profile.d/bash_completion.sh" ]]; then
+    source "${CONDA_ROOT}/etc/profile.d/bash_completion.sh"
 fi
 
 # pipx completions
-eval "$(register-python-argcomplete pipx)"
+if command -v register-python-argcomplete >/dev/null 2>&1; then
+    eval "$(register-python-argcomplete pipx)"
+fi
 
+# aws cli completions
+if command -v aws &> /dev/null; then
+    complete -C "$(command -v aws_completer)" aws
+fi
 # asdf
 if [ -f "$HOME/.asdf/asdf.sh" ]; then
   . "$HOME/.asdf/asdf.sh"
@@ -108,19 +114,14 @@ if [ -d "/opt/nvim" ] ; then
   export PATH="$PATH:/opt/nvim"
 fi
 
-# starship
-if command -v starship &> /dev/null; then
-  eval "$(starship init bash)"
-fi
-
 # add private bin to PATH
 if [ -d "$HOME/.local/bin" ] ; then
     PATH="$HOME/.local/bin:$PATH"
 fi
 
-# aws cli completions
-if command -v aws &> /dev/null; then
-    complete -C "$(command -v aws_completer)" aws
+# starship
+if command -v starship &> /dev/null; then
+  eval "$(starship init bash)"
 fi
 
 [[ ${BLE_VERSION-} ]] && ble-attach
