@@ -90,8 +90,6 @@ unset __conda_setup
 CONDA_ROOT=~/miniconda3
 if [[ -r $CONDA_ROOT/etc/profile.d/bash_completion.sh ]]; then
     source $CONDA_ROOT/etc/profile.d/bash_completion.sh
-else
-    echo "WARNING: could not find conda-bash-completion setup script"
 fi
 
 # pipx completions
