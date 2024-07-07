@@ -4,7 +4,7 @@
 brew upgrade
 
 # conda
-conda update -n base conda
+conda update -n base conda -y
 
 # poetry
 pipx upgrade poetry
