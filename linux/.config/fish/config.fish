@@ -14,6 +14,12 @@ if status is-interactive
         end
     end
 
+    # Go
+    if test -d $HOME/go/bin
+        set -gx GOBIN $HOME/go/bin
+        fish_add_path $GOBIN
+    end
+
     # Rust
     if test -f $HOME/.cargo/env.fish
         source $HOME/.cargo/env.fish
