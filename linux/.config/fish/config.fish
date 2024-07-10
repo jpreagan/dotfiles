@@ -59,6 +59,10 @@ if status is-interactive
         source $HOME/.asdf/asdf.fish
     end
 
+    if test -d /opt/nvim
+        fish_add_path /opt/nvim
+    end
+
     if test -d $HOME/.local/bin
         fish_add_path $HOME/.local/bin
     end
