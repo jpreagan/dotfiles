@@ -30,7 +30,7 @@ gh extension upgrade --all
 
 # asdf
 asdf update
-asdf plugin update --all
+asdf plugin-update --all
 
 # npm
 npm update -g
