@@ -3,14 +3,14 @@
 # apt
 sudo apt-get update
 sudo apt-get dist-upgrade -y
-sudo apt-get clean -y
-sudo apt-get autoclean -y
 
 # ble.sh
 bash ~/.local/share/blesh/ble.sh --update
 
 # rust
 rustup upgrade
+rustup completions bash >| ~/.local/share/bash-completion/completions/rustup
+rustup completions bash cargo >| ~/.local/share/bash-completion/completions/cargo
 
 # miniconda
 conda update -y -n base conda
@@ -27,18 +27,18 @@ asdf plugin-update --all
 
 # npm
 npm update -g
+npm completion bash >| ~/.local/share/bash-completion/completions/npm
 
 # starship
-curl -sS https://starship.rs/install.sh -V -y | sh
+curl -sS https://starship.rs/install.sh | sh -s -- --yes
+starship completions bash >| ~/.local/share/bash-completion/completions/starship
 
 # aws cli
 curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
 unzip awscliv2.zip
 sudo ./aws/install --bin-dir /usr/local/bin --install-dir /usr/local/aws-cli --update
+rm -rf aws/ awscliv2.zip
 
-# completions
-starship completions bash >| ~/.local/share/bash-completion/completions/starship
+# other completions
 poetry completions bash >| ~/.local/share/bash-completion/completions/poetry
 docker completion bash >| ~/.local/share/bash-completion/completions/docker
-rustup completions bash >| ~/.local/share/bash-completion/completions/rustup
-rustup completions bash cargo >| ~/.local/share/bash-completion/completions/cargo
