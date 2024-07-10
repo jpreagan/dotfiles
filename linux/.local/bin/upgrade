@@ -29,7 +29,7 @@ asdf plugin-update --all
 npm update -g
 
 # starship
-curl -sS https://starship.rs/install.sh | sh
+curl -sS https://starship.rs/install.sh -V -y | sh
 
 # aws cli
 curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
@@ -37,7 +37,7 @@ unzip awscliv2.zip
 sudo ./aws/install --bin-dir /usr/local/bin --install-dir /usr/local/aws-cli --update
 
 # completions
-starship completions bash > ~/.local/share/bash-completion/completions/starship
+starship completions bash >| ~/.local/share/bash-completion/completions/starship
 poetry completions bash >| ~/.local/share/bash-completion/completions/poetry
 docker completion bash >| ~/.local/share/bash-completion/completions/docker
 rustup completions bash >| ~/.local/share/bash-completion/completions/rustup
