@@ -27,7 +27,7 @@ if status is-interactive
 
     # Python
     if test -d /Library/Frameworks/Python.framework/Versions/3.12/bin
-        fish_add_path /Library/Frameworks/Python.framework/Versions/3.12/bin
+        set -x PATH "/Library/Frameworks/Python.framework/Versions/3.12/bin" "$PATH"
     end
 
     # >>> conda initialize >>>
@@ -64,7 +64,7 @@ if status is-interactive
     end
 
     if test -d $HOME/.local/bin
-        fish_add_path $HOME/.local/bin
+        set -gx PATH $HOME/.local/bin $PATH
     end
 
     # Launch starship
