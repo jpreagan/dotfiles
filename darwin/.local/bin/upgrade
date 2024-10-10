@@ -21,6 +21,7 @@ docker completion fish >| ~/.config/fish/completions/docker.fish
 rustup update
 mkdir -p ~/.local/share/zsh/site-functions
 rustup completions zsh >| ~/.local/share/zsh/site-functions/_rustup
+cargo install-update -a
 
 # google cloud cli
 gcloud components update

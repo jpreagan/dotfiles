@@ -11,6 +11,7 @@ bash ~/.local/share/blesh/ble.sh --update
 rustup upgrade
 rustup completions bash >| ~/.local/share/bash-completion/completions/rustup
 rustup completions bash cargo >| ~/.local/share/bash-completion/completions/cargo
+cargo install-update -a
 
 # miniconda
 conda update -y -n base conda
