@@ -44,6 +44,10 @@ if status is-interactive
     # The next line updates PATH for the Google Cloud SDK.
     if [ -f "$HOME/.local/google-cloud-sdk/path.fish.inc" ]; . "$HOME/.local/google-cloud-sdk/path.fish.inc"; end
 
+    # Google Cloud SDK Fish completions
+    complete -c gcloud -f -a '(__fish_argcomplete_complete gcloud)'
+    complete -c gsutil -f -a '(__fish_argcomplete_complete gsutil)'
+
     # AWS CLI
     if command -q aws
         complete --command aws --no-files --arguments '(begin; set --local --export COMP_SHELL fish; set --local --export COMP_LINE (commandline); aws_completer | sed \'s/ $//\'; end)'
