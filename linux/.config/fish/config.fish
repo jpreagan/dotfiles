@@ -26,8 +26,8 @@ if status is-interactive
     end
 
     # Python
-    if test -d /Library/Frameworks/Python.framework/Versions/3.12/bin
-        set -x PATH "/Library/Frameworks/Python.framework/Versions/3.12/bin" "$PATH"
+    if test -d /Library/Frameworks/Python.framework/Versions/Current/bin
+        set -x PATH "/Library/Frameworks/Python.framework/Versions/Current/bin" "$PATH"
     end
 
     # >>> conda initialize >>>

@@ -30,8 +30,8 @@ if (( $+commands[rustup] )); then
 fi
 
 # Python
-if [ -d "/Library/Frameworks/Python.framework/Versions/3.12/bin" ] ; then
-    export PATH="/Library/Frameworks/Python.framework/Versions/3.12/bin:$PATH"
+if [ -d "/Library/Frameworks/Python.framework/Versions/Current/bin" ] ; then
+    export PATH="/Library/Frameworks/Python.framework/Versions/Current/bin:$PATH"
 fi
 
 # Miniconda
