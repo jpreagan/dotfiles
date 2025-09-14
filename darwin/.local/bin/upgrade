@@ -3,8 +3,11 @@
 # homebrew
 brew upgrade
 
-# conda
-conda update -n base conda -y
+# uv tools
+uv tool upgrade --all
+
+# pipx
+pipx upgrade-all
 
 # poetry
 pipx upgrade poetry
@@ -29,9 +32,6 @@ gcloud components update
 # gh extensions
 gh extension upgrade --all
 
-# asdf
-asdf update
-asdf plugin-update --all
-
 # npm
 npm update -g
+
