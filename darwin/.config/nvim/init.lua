@@ -188,7 +188,6 @@ require('lazy').setup({
       end, { desc = '[S]earch [N]eovim files' })
     end,
   },
-
   {
     'folke/lazydev.nvim',
     ft = 'lua',
@@ -438,6 +437,10 @@ require('lazy').setup({
       },
       indent = { enable = true, disable = { 'ruby' } },
     },
+  },
+  {
+    'folke/zen-mode.nvim',
+    opts = {},
   },
 }, {
   ui = {
