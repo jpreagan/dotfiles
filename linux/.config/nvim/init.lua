@@ -440,7 +440,73 @@ require('lazy').setup({
   },
   {
     'folke/zen-mode.nvim',
-    opts = {},
+    keys = {
+      { '<leader>z', function() require('zen-mode').toggle() end, desc = 'Toggle Zen Mode' },
+    },
+    opts = {
+      window = {
+        backdrop = 0.95,
+        width = 90,
+        options = {
+          signcolumn = 'no',
+          number = false,
+          relativenumber = false,
+          cursorline = false,
+          cursorcolumn = false,
+          foldcolumn = '0',
+          list = false,
+          wrap = true,
+          linebreak = true,
+          colorcolumn = '',
+        },
+      },
+      plugins = {
+        options = {
+          enabled = true,
+          laststatus = 0,
+          ruler = false,
+          showcmd = false,
+        },
+        gitsigns = { enabled = false },
+        tmux = { enabled = false },
+        twilight = { enabled = false },
+      },
+      on_open = function()
+        local opts = vim.opt_local
+        vim.b.zen_prev = {
+          spell = opts.spell:get(),
+          spelllang = opts.spelllang:get(),
+          wrap = opts.wrap:get(),
+          linebreak = opts.linebreak:get(),
+          colorcolumn = opts.colorcolumn:get(),
+          textwidth = opts.textwidth:get(),
+          conceallevel = opts.conceallevel:get(),
+        }
+
+        opts.spell = true
+        opts.spelllang = { 'en_us' }
+        opts.wrap = true
+        opts.linebreak = true
+        opts.colorcolumn = ''
+        opts.textwidth = 0
+        opts.conceallevel = 2
+      end,
+      on_close = function()
+        local prev = vim.b.zen_prev
+        if not prev then
+          return
+        end
+        local opts = vim.opt_local
+        opts.spell = prev.spell
+        opts.spelllang = prev.spelllang
+        opts.wrap = prev.wrap
+        opts.linebreak = prev.linebreak
+        opts.colorcolumn = prev.colorcolumn
+        opts.textwidth = prev.textwidth
+        opts.conceallevel = prev.conceallevel
+        vim.b.zen_prev = nil
+      end,
+    },
   },
 }, {
   ui = {
