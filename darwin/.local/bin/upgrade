@@ -35,3 +35,10 @@ gh extension upgrade --all
 # npm
 npm update -g
 
+# MacTeX
+# sudo tlmgr update --self
+# sudo tlmgr update --all
+
+# claude
+claude update
+
