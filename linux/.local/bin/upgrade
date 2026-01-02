@@ -4,35 +4,28 @@
 sudo apt-get update
 sudo apt-get dist-upgrade -y
 
-# ble.sh
-bash ~/.local/share/blesh/ble.sh --update
+# flatpak
+flatpak update -y
+
+# appimages
+appimageupdatetool --self-update
+appimageupdatetool -rO ~/AppImages/*.appimage
 
 # rust
 rustup upgrade
-rustup completions bash >| ~/.local/share/bash-completion/completions/rustup
-rustup completions bash cargo >| ~/.local/share/bash-completion/completions/cargo
 cargo install-update -a
 
-# miniconda
-conda update -y -n base conda
+# uv
+uv self update
 
-# pipx
-pipx upgrade-all
-
-# gh extensions
-gh extension upgrade --all
-
-# asdf
-asdf update
-asdf plugin-update --all
+# uv tools
+uv tool upgrade --all
 
 # npm
 npm update -g
-npm completion bash >| ~/.local/share/bash-completion/completions/npm
 
 # starship
-curl -sS https://starship.rs/install.sh | sh -s -- --yes
-starship completions bash >| ~/.local/share/bash-completion/completions/starship
+curl -sS https://starship.rs/install.sh | sh -s -- -y -b ~/.local/bin
 
 # aws cli
 curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
@@ -40,6 +33,6 @@ unzip awscliv2.zip
 sudo ./aws/install --bin-dir /usr/local/bin --install-dir /usr/local/aws-cli --update
 rm -rf aws/ awscliv2.zip
 
-# other completions
-poetry completions bash >| ~/.local/share/bash-completion/completions/poetry
-docker completion bash >| ~/.local/share/bash-completion/completions/docker
+# claude code
+claude update
+
