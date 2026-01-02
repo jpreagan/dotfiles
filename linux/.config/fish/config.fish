@@ -5,6 +5,9 @@ if status is-interactive
     # Enable vi key bindings
     fish_vi_key_bindings
 
+    set -gx EDITOR nvim
+    set -gx VISUAL nvim
+
     # Homebrew
     if not command -q brew
         if test -d /opt/homebrew/bin
@@ -15,6 +18,11 @@ if status is-interactive
     end
 
     # Go
+    if test -d /usr/local/go
+        set -gx GOROOT /usr/local/go
+        fish_add_path /usr/local/go/bin
+    end
+
     if test -d $HOME/go/bin
         set -gx GOBIN $HOME/go/bin
         fish_add_path $GOBIN
@@ -74,3 +82,6 @@ if status is-interactive
     # Launch starship
     starship init fish | source
 end
+
+# opencode
+fish_add_path /home/jpreagan/.opencode/bin
