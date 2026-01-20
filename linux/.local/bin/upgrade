@@ -4,12 +4,9 @@
 sudo apt-get update
 sudo apt-get dist-upgrade -y
 
-# flatpak
-flatpak update -y
-
-# appimages
-appimageupdatetool --self-update
-appimageupdatetool -rO ~/AppImages/*.appimage
+# soar
+soar self update
+soar update
 
 # rust
 rustup upgrade
