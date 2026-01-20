@@ -1,0 +1,5 @@
+theme = tokyonight
+font-family = JetBrains Mono
+font-size = 16
+font-thicken = true
+keybind = shift+enter=text:\n
