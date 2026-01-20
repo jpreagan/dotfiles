@@ -57,3 +57,6 @@ end
 set -gx PATH $PATH /Users/jpreagan/.lmstudio/bin
 # End of LM Studio CLI section
 
+
+# Added by Antigravity
+fish_add_path /Users/jpreagan/.antigravity/antigravity/bin
