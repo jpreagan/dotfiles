@@ -1,5 +1,5 @@
 theme = tokyonight
-font-family = JetBrains Mono
+font-family = JetBrains Mono Nerd Font
 font-size = 16
 font-thicken = true
 keybind = shift+enter=text:\n
