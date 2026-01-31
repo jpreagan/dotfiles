@@ -7,8 +7,7 @@ approval_policy = "on-request"
 sandbox_mode = "workspace-write"
 model_reasoning_effort = "xhigh"
 
-[features]
-web_search_request = true
+web_search = "live"
 
 [sandbox_workspace_write]
 network_access = true
@@ -18,4 +17,3 @@ network_access = true
 
 [notice.model_migrations]
 "gpt-5.1-codex-max" = "gpt-5.2-codex"
-
