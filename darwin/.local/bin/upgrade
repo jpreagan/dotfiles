@@ -33,3 +33,5 @@ npm update -g
 # claude
 claude update
 
+# skills
+npx skills update
