@@ -28,11 +28,8 @@ if test -f $HOME/.cargo/env.fish
 end
 
 # Python
-fish_add_path --path /Library/Frameworks/Python.framework/Versions/Current/bin
-
-# Google Cloud SDK path
-if test -f $HOME/.local/google-cloud-sdk/path.fish.inc
-    source $HOME/.local/google-cloud-sdk/path.fish.inc
+if test -d /Library/Frameworks/Python.framework/Versions/Current/bin
+    fish_add_path --path /Library/Frameworks/Python.framework/Versions/Current/bin
 end
 
 # pnpm
@@ -58,20 +55,6 @@ end
 if status is-interactive
     set -g fish_greeting
     fish_vi_key_bindings
-
-    # Google Cloud SDK completions
-    complete -c gcloud -f -a '(__fish_argcomplete_complete gcloud)'
-    complete -c gsutil -f -a '(__fish_argcomplete_complete gsutil)'
-
-    # AWS CLI completion
-    if command -q aws; and command -q aws_completer
-        complete --command aws --no-files --arguments '(begin; set --local --export COMP_SHELL fish; set --local --export COMP_LINE (commandline); aws_completer | sed \'s/ $//\'; end)'
-    end
-
-    # Azure CLI completion
-    if command -q az
-        complete --command az --no-files --arguments '(__fish_argcomplete_complete az)'
-    end
 
     if command -q starship
         starship init fish | source
