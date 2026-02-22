@@ -1,62 +1,79 @@
-if status is-interactive
-    # Disable the greeting
-    set -g fish_greeting
+set -gx EDITOR nvim
+set -gx VISUAL $EDITOR
 
-    # Enable vi key bindings
+if command -q bat
+    set -gx PAGER bat
+else if command -q batcat
+    set -gx PAGER batcat
+else
+    set -gx PAGER less
+end
+
+# Homebrew
+if not command -q brew
+    if test -x /opt/homebrew/bin/brew
+        eval (/opt/homebrew/bin/brew shellenv)
+    end
+end
+
+# Go
+if test -d $HOME/go/bin
+    set -gx GOBIN $HOME/go/bin
+    fish_add_path --path $GOBIN
+end
+
+# Rust
+if test -f $HOME/.cargo/env.fish
+    source $HOME/.cargo/env.fish
+end
+
+# Python
+fish_add_path --path /Library/Frameworks/Python.framework/Versions/Current/bin
+
+# Google Cloud SDK path
+if test -f $HOME/.local/google-cloud-sdk/path.fish.inc
+    source $HOME/.local/google-cloud-sdk/path.fish.inc
+end
+
+# pnpm
+set -gx PNPM_HOME $HOME/Library/pnpm
+if test -d $PNPM_HOME
+    fish_add_path --path $PNPM_HOME
+end
+
+# OpenCode
+if test -d $HOME/.opencode/bin
+    fish_add_path --path $HOME/.opencode/bin
+end
+
+# LM Studio
+if test -d $HOME/.lmstudio/bin
+    fish_add_path --path $HOME/.lmstudio/bin
+end
+
+if test -d $HOME/.local/bin
+    fish_add_path --path $HOME/.local/bin
+end
+
+if status is-interactive
+    set -g fish_greeting
     fish_vi_key_bindings
 
-    # Homebrew
-    if not command -q brew
-        if test -d /opt/homebrew/bin
-            eval (/opt/homebrew/bin/brew shellenv)
-        end
-    end
-
-    # Go
-    if test -d $HOME/go/bin
-        set -gx GOBIN $HOME/go/bin
-        fish_add_path $GOBIN
-    end
-
-    # Rust
-    if test -f $HOME/.cargo/env.fish
-        source $HOME/.cargo/env.fish
-    end
-
-    # Python
-    if test -d /Library/Frameworks/Python.framework/Versions/Current/bin
-        set -x PATH "/Library/Frameworks/Python.framework/Versions/Current/bin" "$PATH"
-    end
-
-    # The next line updates PATH for the Google Cloud SDK.
-    if [ -f "$HOME/.local/google-cloud-sdk/path.fish.inc" ]; . "$HOME/.local/google-cloud-sdk/path.fish.inc"; end
-
-    # Google Cloud SDK Fish completions
+    # Google Cloud SDK completions
     complete -c gcloud -f -a '(__fish_argcomplete_complete gcloud)'
     complete -c gsutil -f -a '(__fish_argcomplete_complete gsutil)'
 
-    # AWS CLI
-    if command -q aws
+    # AWS CLI completion
+    if command -q aws; and command -q aws_completer
         complete --command aws --no-files --arguments '(begin; set --local --export COMP_SHELL fish; set --local --export COMP_LINE (commandline); aws_completer | sed \'s/ $//\'; end)'
     end
 
-    # Azure CLI
+    # Azure CLI completion
     if command -q az
         complete --command az --no-files --arguments '(__fish_argcomplete_complete az)'
     end
 
-    if test -d $HOME/.local/bin
-        set -gx PATH $HOME/.local/bin $PATH
+    if command -q starship
+        starship init fish | source
     end
-
-    # Launch starship
-    starship init fish | source
 end
-
-# Added by LM Studio CLI (lms)
-set -gx PATH $PATH /Users/jpreagan/.lmstudio/bin
-# End of LM Studio CLI section
-
-
-# Added by Antigravity
-fish_add_path /Users/jpreagan/.antigravity/antigravity/bin
