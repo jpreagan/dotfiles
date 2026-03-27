@@ -1,14 +1,16 @@
 {
+  "model": "opus",
+  "effortLevel": "high",
+  "alwaysThinkingEnabled": true,
+  "permissions": {
+    "defaultMode": "bypassPermissions"
+  },
+  "skipDangerousModePermissionPrompt": true,
   "attribution": {
     "commit": "",
     "pr": ""
   },
-  "permissions": {
-    "defaultMode": "bypassPermissions"
-  },
   "enabledPlugins": {
     "rust-analyzer-lsp@claude-plugins-official": true
-  },
-  "alwaysThinkingEnabled": true,
-  "skipDangerousModePermissionPrompt": true
+  }
 }

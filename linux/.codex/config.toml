@@ -1,15 +1,17 @@
-preferred_auth_method = "chatgpt"
-
-model = "gpt-5.3-codex"
+model = "gpt-5.4"
 model_reasoning_summary = "auto"
 
-approval_policy = "on-request"
+approval_policy = "never"
 sandbox_mode = "workspace-write"
-model_reasoning_effort = "high"
+model_reasoning_effort = "xhigh"
 
 web_search = "live"
 personality = "pragmatic"
+approvals_reviewer = "user"
 
 [sandbox_workspace_write]
 network_access = true
+
+[plugins."github@openai-curated"]
+enabled = true
 
