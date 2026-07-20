@@ -6,12 +6,12 @@
 stow -Rv -t "$HOME" linux
 ```
 
-## macOS
+## cheerio
 
 ```bash
-brew install ast-grep bat bottom coreutils difftastic direnv dust eza fd ffmpeg fish fzf gawk git-delta glow gnu-sed gnu-tar hyperfine imagemagick jq just lazygit procs ripgrep sd starship tldr tokei tree watchexec wireshark xh yq yt-dlp zellij zoxide
+brew install ast-grep bat bottom coreutils difftastic direnv dust eza fd ffmpeg fish fzf gawk gh git-delta glow gnu-sed gnu-tar hyperfine imagemagick jq just lazygit neovim procs ripgrep sd starship stow tldr tokei tree tree-sitter-cli uv watchexec wireshark xh yq yt-dlp zellij zoxide
 ```
 
 ```bash
-stow -Rv -t "$HOME" darwin
+stow -Rv -t "$HOME" cheerio
 ```

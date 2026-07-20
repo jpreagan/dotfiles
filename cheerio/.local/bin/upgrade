@@ -1,0 +1,31 @@
+#!/bin/bash
+set -euo pipefail
+
+# homebrew
+brew upgrade
+
+# google cloud cli
+gcloud components update
+
+# uv tools
+uv tool upgrade --all
+
+# rust
+rustup update
+cargo install-update -a
+
+# npm
+npm update -g
+
+# codex
+codex update
+
+# claude
+claude update
+
+# neovim
+# :lua vim.pack.update()
+# :write
+# :restart
+# :MasonToolsUpdate
+# :TSUpdate
