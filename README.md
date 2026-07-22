@@ -3,7 +3,7 @@
 ## Linux
 
 ```bash
-stow -Rv -t "$HOME" linux
+stow -Rv --no-folding -t "$HOME" linux
 ```
 
 ## cheerio
@@ -13,5 +13,5 @@ brew install ast-grep bat bottom coreutils difftastic direnv dust eza fd ffmpeg 
 ```
 
 ```bash
-stow -Rv -t "$HOME" cheerio
+stow -Rv --no-folding -t "$HOME" cheerio
 ```
