@@ -1,0 +1,54 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+[[ "$(uname -s)" == "Darwin" ]] || exit 0
+[[ -d /Library/Frameworks/Python.framework ]] || exit 0
+
+die() { echo "upgrade-python-org: $*" >&2; exit 2; }
+
+base="https://www.python.org/ftp/python"
+
+installed="$(
+  /usr/local/bin/python3 -V 2>/dev/null | awk '{print $2}' || true
+)"
+
+versions="$(
+  curl -fsSL "${base}/" \
+    | sed -nE 's/.*href="([0-9]+\.[0-9]+\.[0-9]+)\/".*/\1/p' \
+    | sort -V -r
+)"
+[[ -n "${versions}" ]] || die "couldn't determine latest stable version"
+
+latest=""
+pkg=""
+while IFS= read -r v; do
+  [[ -n "${v}" ]] || continue
+  pkg="$(
+    curl -fsSL "${base}/${v}/" \
+      | sed -nE "s/.*href=\"(python-${v}-macos[^\"]+\\.pkg)\".*/\\1/p" \
+      | head -n 1
+  )"
+  if [[ -n "${pkg}" ]]; then
+    latest="${v}"
+    break
+  fi
+done <<<"${versions}"
+
+[[ -n "${latest}" ]] || die "couldn't find a macOS installer pkg on python.org"
+
+if [[ -n "${installed}" ]] && [[ "${installed}" == "${latest}" ]]; then
+  exit 0
+fi
+
+tmp="$(mktemp -d)"
+trap 'rm -rf "$tmp"' EXIT
+
+curl -fsSL -o "${tmp}/${pkg}" "${base}/${latest}/${pkg}"
+
+sig="$(pkgutil --check-signature "${tmp}/${pkg}" 2>&1 || true)"
+if ! grep -q "Python Software Foundation" <<<"${sig}"; then
+  echo "${sig}" >&2
+  die "unexpected pkg signature; refusing to install"
+fi
+
+sudo installer -pkg "${tmp}/${pkg}" -target /
