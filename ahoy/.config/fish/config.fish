@@ -60,3 +60,7 @@ if status is-interactive
         starship init fish | source
     end
 end
+
+# >>> grok installer >>>
+fish_add_path $HOME/.grok/bin
+# <<< grok installer <<<
