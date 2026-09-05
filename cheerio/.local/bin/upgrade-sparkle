@@ -1,0 +1,113 @@
+#!/usr/bin/env python3
+"""Update the locally built Sparkle CLI from official stable releases."""
+
+import argparse
+import fcntl
+import hashlib
+import json
+from pathlib import Path
+import re
+import shutil
+import subprocess
+import sys
+import tempfile
+
+
+def run(*args):
+    return subprocess.run(args, check=True)
+
+
+def download(url, path):
+    run("curl", "--fail", "--silent", "--show-error", "--location",
+        "--retry", "3", "--connect-timeout", "15", "--max-time", "300",
+        "--proto", "=https", "--proto-redir", "=https", "--output", str(path), url)
+
+
+def version_tuple(version):
+    if not re.fullmatch(r"\d+\.\d+\.\d+", version):
+        raise ValueError(f"Unexpected Sparkle release version: {version!r}")
+    return tuple(map(int, version.split(".")))
+
+
+def upgrade(destination):
+    destination.parent.mkdir(parents=True, exist_ok=True)
+    # Keep concurrent daily runs from replacing the same installation.
+    with (destination.parent / ".upgrade-sparkle.lock").open("a") as lock:
+        fcntl.flock(lock, fcntl.LOCK_EX)
+        with tempfile.TemporaryDirectory(prefix=".sparkle-build-", dir=destination.parent) as tmp:
+            work = Path(tmp)
+            metadata = work / "release.json"
+            download("https://api.github.com/repos/sparkle-project/Sparkle/releases/latest", metadata)
+            release = json.loads(metadata.read_text())
+            version = release["tag_name"]
+            latest = version_tuple(version)
+            if release.get("draft") or release.get("prerelease"):
+                raise ValueError("Expected a published stable Sparkle release")
+
+            installed = None
+            if (destination / "VERSION").exists():
+                installed = (destination / "VERSION").read_text().strip()
+            elif (destination / "SOURCE.txt").exists():
+                match = re.match(r"Sparkle (\d+\.\d+\.\d+),", (destination / "SOURCE.txt").read_text())
+                if match:
+                    installed = match[1]
+            if installed and version_tuple(installed) >= latest and (destination / "sparkle").is_file() and (destination / "Sparkle.framework/Sparkle").exists():
+                print(f"Sparkle {installed}: already up to date.")
+                return
+
+            print(f"Building Sparkle {version} (installed: {installed or 'none'})…", flush=True)
+            name = f"Sparkle-{version}.tar.xz"
+            asset = next(asset for asset in release["assets"] if asset["name"] == name)
+            digest = asset.get("digest", "")
+            if not re.fullmatch(r"sha256:[0-9a-f]{64}", digest):
+                raise ValueError("Release has no SHA-256 digest; leaving the existing updater untouched")
+            url = f"https://github.com/sparkle-project/Sparkle/releases/download/{version}/{name}"
+            if asset["browser_download_url"] != url:
+                raise ValueError("Unexpected Sparkle release download URL")
+            archive = work / name
+            download(url, archive)
+            if hashlib.sha256(archive.read_bytes()).hexdigest() != digest.removeprefix("sha256:"):
+                raise ValueError("Sparkle archive checksum mismatch")
+
+            staged = work / "installed"
+            staged.mkdir()
+            run("tar", "-xf", str(archive), "-C", str(staged), "./Sparkle.framework", "./LICENSE")
+            sources = ["main.m", "SPUCommandLineDriver.h", "SPUCommandLineDriver.m",
+                       "SPUCommandLineUserDriver.h", "SPUCommandLineUserDriver.m"]
+            for source in sources:
+                download(f"https://raw.githubusercontent.com/sparkle-project/Sparkle/{version}/sparkle-cli/{source}", staged / source)
+            run("xcrun", "clang", "-fobjc-arc", "-DSPU_OBJC_DIRECT_MEMBERS=", "-DSPU_OBJC_DIRECT=",
+                "-F", str(staged), "-framework", "Sparkle", "-framework", "Cocoa",
+                "-Wl,-rpath,@executable_path", str(staged / "main.m"),
+                str(staged / "SPUCommandLineDriver.m"), str(staged / "SPUCommandLineUserDriver.m"),
+                "-o", str(staged / "sparkle"))
+            # Argument validation loads the executable and framework without updating any app.
+            check = subprocess.run([str(staged / "sparkle")], capture_output=True, text=True)
+            if "Usage:" not in check.stderr:
+                raise RuntimeError(f"Built Sparkle failed its startup check: {check.stderr}")
+            (staged / "VERSION").write_text(version + "\n")
+            (staged / "SOURCE.txt").write_text(f"Sparkle {version}, official sparkle-project/Sparkle sources and release framework.\n{url}\nRelease archive {digest}\n")
+            shutil.copy2(metadata, staged / "release.json")
+
+            backup = work / "previous"
+            had_previous = destination.exists()
+            if had_previous:
+                destination.rename(backup)
+            try:
+                staged.rename(destination)
+            except BaseException:
+                if had_previous:
+                    backup.rename(destination)
+                raise
+            print(f"Sparkle {version}: installed.")
+
+
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--install-dir", type=Path, default=Path.home() / ".local/lib/codex-updater")
+    args = parser.parse_args()
+    try:
+        upgrade(args.install_dir.expanduser().absolute())
+    except (OSError, ValueError, KeyError, StopIteration, RuntimeError, subprocess.CalledProcessError) as error:
+        print(f"Sparkle update failed: {error}", file=sys.stderr)
+        sys.exit(1)
