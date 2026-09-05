@@ -1,0 +1,44 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+# Update the Codex desktop app (shipped as ChatGPT.app, bundle id com.openai.codex)
+# with the locally built Sparkle CLI. The CLI reports outcomes through its exit
+# status, and 4 means "no new update available", which is a success here.
+
+app=/Applications/ChatGPT.app
+sparkle="$HOME/.local/lib/codex-updater/sparkle"
+feed=https://persistent.oaistatic.com/codex-app-prod/appcast.xml
+
+die() { echo "upgrade-chatgpt-desktop: $*" >&2; exit 1; }
+
+[[ -d "$app" ]] || die "$app is not installed"
+[[ -x "$sparkle" ]] || die "$sparkle is missing; run upgrade-sparkle first"
+
+version() {
+  /usr/libexec/PlistBuddy -c 'Print :CFBundleShortVersionString' "$app/Contents/Info.plist"
+}
+
+before="$(version)"
+status=0
+"$sparkle" "$app" \
+  --check-immediately \
+  --verbose \
+  --feed-url "$feed" \
+  --user-agent-name terminal-upgrade || status=$?
+
+case "$status" in
+  0)
+    after="$(version)"
+    if [[ "$after" == "$before" ]]; then
+      echo "Codex $before: check completed, nothing installed."
+    else
+      echo "Codex $after: installed (was $before)."
+    fi
+    ;;
+  4)
+    echo "Codex $before: already up to date."
+    ;;
+  *)
+    die "sparkle exited with status $status"
+    ;;
+esac

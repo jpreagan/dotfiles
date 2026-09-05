@@ -20,11 +20,8 @@ npm update -g
 # sparkle cli
 "$HOME/.local/bin/upgrade-sparkle"
 
-# codex desktop
-"$HOME/.local/lib/codex-updater/sparkle" /Applications/ChatGPT.app \
-  --check-immediately \
-  --feed-url https://persistent.oaistatic.com/codex-app-prod/appcast.xml \
-  --user-agent-name terminal-upgrade
+# codex
+"$HOME/.local/bin/upgrade-chatgpt-desktop"
 
 # codex cli
 codex update
