@@ -109,7 +109,7 @@ do
         return
       end
 
-      if name == 'nvim-treesitter' then
+      if name == 'nvim-treesitter' and not vim.g.upgrade_nvim then
         if not ev.data.active then vim.cmd.packadd 'nvim-treesitter' end
         vim.cmd 'TSUpdate'
         return
@@ -361,7 +361,7 @@ do
   local ensure_installed = vim.tbl_keys(servers or {})
   vim.list_extend(ensure_installed, { 'stylua' })
 
-  require('mason-tool-installer').setup { ensure_installed = ensure_installed }
+  require('mason-tool-installer').setup { ensure_installed = ensure_installed, run_on_start = not vim.g.upgrade_nvim }
 
   for name, server in pairs(servers) do
     vim.lsp.config(name, server)
@@ -425,7 +425,11 @@ do
   vim.pack.add { { src = gh 'nvim-treesitter/nvim-treesitter', version = 'main' } }
 
   local parsers = { 'bash', 'c', 'diff', 'html', 'lua', 'luadoc', 'markdown', 'markdown_inline', 'query', 'vim', 'vimdoc' }
-  require('nvim-treesitter').install(parsers)
+  if vim.g.upgrade_nvim then
+    vim.g.upgrade_nvim_parsers = parsers
+  else
+    require('nvim-treesitter').install(parsers)
+  end
 
   local function treesitter_try_attach(buf, language)
     if not vim.treesitter.language.add(language) then return end

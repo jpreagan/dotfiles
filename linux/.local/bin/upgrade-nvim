@@ -1,0 +1,80 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+tmp="$(mktemp -d)"
+trap 'rm -rf "$tmp"' EXIT
+
+cat >"${tmp}/update.lua" <<'LUA'
+local failures = {}
+vim.notify = function(message, level)
+  print(tostring(message))
+  if level == vim.log.levels.ERROR then table.insert(failures, tostring(message)) end
+end
+
+local ok, err = xpcall(function()
+  assert(vim.v.errmsg == '', vim.v.errmsg)
+  if vim.env.NVIM_UPGRADE_PHASE == 'plugins' then
+    print('Updating Neovim plugins…')
+    local log = vim.fn.stdpath('log') .. '/nvim-pack.log'
+    local before = vim.fn.filereadable(log) == 1 and #vim.fn.readfile(log) or 0
+    vim.pack.update(nil, { force = true })
+    -- vim.pack reports per-plugin failures in its log rather than throwing them.
+    local lines = vim.fn.readfile(log)
+    for i = before + 1, #lines do
+      print(lines[i])
+      assert(not lines[i]:match('^# Error'), 'Plugin update failed; see ' .. log)
+    end
+  else
+    print('Updating Mason registry…')
+    local registry = require('mason-registry')
+    local refreshed, refresh_ok = false, false
+    registry.update(function(success)
+      refresh_ok, refreshed = success, true
+    end)
+    assert(vim.wait(120000, function() return refreshed end), 'Mason registry update timed out')
+    assert(refresh_ok, 'Mason registry update failed')
+    for _, package in ipairs(registry.get_all_packages()) do
+      package:on('install:failed', function()
+        table.insert(failures, 'Mason install failed: ' .. package.name)
+      end)
+    end
+
+    print('Updating Mason tools…')
+    local completed = false
+    vim.api.nvim_create_autocmd('User', {
+      pattern = 'MasonToolsUpdateCompleted',
+      once = true,
+      callback = function() completed = true end,
+    })
+    vim.cmd('MasonToolsUpdate')
+    assert(vim.wait(1200000, function() return completed end), 'Mason tools update timed out')
+
+    local treesitter = require('nvim-treesitter')
+    local parsers = vim.g.upgrade_nvim_parsers
+    assert(type(parsers) == 'table', 'Missing configured Tree-sitter parser list')
+    print('Installing missing configured Tree-sitter parsers…')
+    assert(treesitter.install(parsers, { summary = true }):wait(1200000),
+      'Tree-sitter parser installation failed')
+    print('Updating Tree-sitter parsers…')
+    assert(treesitter.update(nil, { summary = true }):wait(1200000),
+      'Tree-sitter parser update failed')
+  end
+  -- Let scheduled error notifications reach the terminal before reporting success.
+  vim.wait(50, function() return false end)
+  assert(#failures == 0, table.concat(failures, '\n'))
+end, debug.traceback)
+
+if not ok then
+  io.stderr:write(tostring(err) .. '\n')
+  vim.cmd('cquit 1')
+else
+  vim.cmd('qa!')
+end
+LUA
+
+# A fresh process loads the updated plugins before updating their managed tools.
+for phase in plugins tools; do
+  NVIM_UPGRADE_PHASE="$phase" NVIM_UPGRADE_SCRIPT="${tmp}/update.lua" \
+    nvim --headless -i NONE --cmd 'lua vim.g.upgrade_nvim = true' \
+    -c 'lua dofile(vim.env.NVIM_UPGRADE_SCRIPT)'
+done
