@@ -45,10 +45,13 @@ trap 'rm -rf "$tmp"' EXIT
 
 curl -fsSL -o "${tmp}/${pkg}" "${base}/${latest}/${pkg}"
 
-sig="$(pkgutil --check-signature "${tmp}/${pkg}" 2>&1 || true)"
-if ! grep -q "Python Software Foundation" <<<"${sig}"; then
+if ! sig="$(pkgutil --check-signature "${tmp}/${pkg}" 2>&1)"; then
   echo "${sig}" >&2
-  die "unexpected pkg signature; refusing to install"
+  die "invalid pkg signature; refusing to install"
+fi
+if ! grep -Fq "Developer ID Installer: Python Software Foundation (" <<<"${sig}"; then
+  echo "${sig}" >&2
+  die "unexpected pkg signer; refusing to install"
 fi
 
 sudo installer -pkg "${tmp}/${pkg}" -target /
