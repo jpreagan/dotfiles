@@ -22,14 +22,12 @@ npm update -g
 
 # codex
 "$HOME/.local/bin/upgrade-chatgpt-desktop"
-open -g -a ChatGPT
 
 # codex cli
 codex update
 
 # claude desktop
 "$HOME/.local/bin/upgrade-claude-desktop"
-open -g -a Claude
 
 # claude code
 claude update
