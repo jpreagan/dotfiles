@@ -2,7 +2,7 @@
 set -euo pipefail
 
 # homebrew
-brew upgrade
+brew upgrade -y
 
 # google cloud cli
 gcloud components update
@@ -17,15 +17,29 @@ cargo install-update -a
 # npm
 npm update -g
 
-# codex
+# sparkle cli
+"$HOME/.local/bin/upgrade-sparkle"
+
+# codex desktop
+"$HOME/.local/lib/codex-updater/sparkle" /Applications/ChatGPT.app \
+  --check-immediately \
+  --feed-url https://persistent.oaistatic.com/codex-app-prod/appcast.xml \
+  --user-agent-name terminal-upgrade
+
+# codex cli
 codex update
 
 # claude
 claude update
 
+# pi
+pi update --all
+
+# grok
+grok update
+
+# herdr
+herdr update
+
 # neovim
-# :lua vim.pack.update()
-# :write
-# :restart
-# :MasonToolsUpdate
-# :TSUpdate
+"$HOME/.local/bin/upgrade-nvim"

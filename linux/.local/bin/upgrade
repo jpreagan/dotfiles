@@ -30,6 +30,14 @@ unzip awscliv2.zip
 sudo ./aws/install --bin-dir /usr/local/bin --install-dir /usr/local/aws-cli --update
 rm -rf aws/ awscliv2.zip
 
+# codex cli
+codex update
+
 # claude code
 claude update
 
+# grok
+grok update
+
+# neovim
+"$HOME/.local/bin/upgrade-nvim"
