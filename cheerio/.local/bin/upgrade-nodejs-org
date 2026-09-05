@@ -1,0 +1,58 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+[[ "$(uname -s)" == "Darwin" ]] || exit 0
+pkgutil --pkg-info org.nodejs.node.pkg >/dev/null 2>&1 || exit 0
+
+die() { echo "upgrade-nodejs-org: $*" >&2; exit 2; }
+
+base="https://nodejs.org/dist"
+installed="$(/usr/local/bin/node --version)"
+
+# Match upgrade-python-org: follow the latest stable release, including new majors.
+latest="$(
+  curl -fsSL "${base}/index.json" | /usr/local/bin/node -e '
+    let data = "";
+    process.stdin.setEncoding("utf8");
+    process.stdin.on("data", chunk => data += chunk);
+    process.stdin.on("end", () => {
+      const releases = JSON.parse(data).filter(release =>
+        /^v\d+\.\d+\.\d+$/.test(release.version) &&
+        release.files.includes("osx-x64-pkg"));
+      releases.sort((a, b) => {
+        const av = a.version.slice(1).split(".").map(Number);
+        const bv = b.version.slice(1).split(".").map(Number);
+        return bv[0] - av[0] || bv[1] - av[1] || bv[2] - av[2];
+      });
+      if (!releases.length) process.exit(1);
+      console.log(releases[0].version);
+    });
+  '
+)" || die "couldn't determine latest stable version"
+[[ "${latest}" =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]] || die "unexpected release version"
+
+if [[ "${installed}" == "${latest}" ]]; then
+  exit 0
+fi
+
+pkg="node-${latest}.pkg"
+tmp="$(mktemp -d)"
+trap 'rm -rf "$tmp"' EXIT
+
+curl -fsSL -o "${tmp}/${pkg}" "${base}/${latest}/${pkg}"
+curl -fsSL -o "${tmp}/SHASUMS256.txt" "${base}/${latest}/SHASUMS256.txt"
+checksum="$(awk -v pkg="${pkg}" '$2 == pkg {print $1}' "${tmp}/SHASUMS256.txt")"
+[[ "${checksum}" =~ ^[0-9a-f]{64}$ ]] || die "missing or invalid installer checksum"
+actual="$(shasum -a 256 "${tmp}/${pkg}" | awk '{print $1}')"
+[[ "${actual}" == "${checksum}" ]] || die "installer checksum mismatch; refusing to install"
+
+if ! sig="$(pkgutil --check-signature "${tmp}/${pkg}" 2>&1)"; then
+  echo "${sig}" >&2
+  die "invalid pkg signature; refusing to install"
+fi
+if ! grep -Fq 'Developer ID Installer: Node.js Foundation (HX7739G8FX)' <<<"${sig}"; then
+  echo "${sig}" >&2
+  die "unexpected pkg signer; refusing to install"
+fi
+
+sudo installer -pkg "${tmp}/${pkg}" -target /
