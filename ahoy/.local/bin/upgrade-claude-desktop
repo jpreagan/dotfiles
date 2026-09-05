@@ -1,0 +1,185 @@
+#!/usr/bin/env python3
+"""Update the Claude desktop app headlessly from its Squirrel.Mac release feed.
+
+Claude.app is an Electron app that updates itself with Squirrel.Mac, which has
+no command line driver. This script does over ssh what the app does on its own:
+read the JSON feed, download the release zip, verify the bundle's Developer ID
+signature and notarization, quit the app, swap the bundle, and relaunch it.
+"""
+
+import argparse
+import fcntl
+import json
+import os
+from pathlib import Path
+import plistlib
+import re
+import shutil
+import signal
+import subprocess
+import sys
+import tempfile
+import time
+
+BUNDLE_ID = "com.anthropic.claudefordesktop"
+BUNDLE_EXECUTABLE = "Claude"
+FEED = "https://downloads.claude.ai/releases/darwin/universal/RELEASES.json"
+RELEASES = "https://downloads.claude.ai/releases/darwin/universal/"
+# The designated requirement of the shipping app: Anthropic's Developer ID.
+REQUIREMENT = (f'identifier "{BUNDLE_ID}" and anchor apple generic'
+               " and certificate 1[field.1.2.840.113635.100.6.2.6]"
+               " and certificate leaf[field.1.2.840.113635.100.6.1.13]"
+               ' and certificate leaf[subject.OU] = "Q6L2SF6YDW"')
+
+
+def run(*args, **kwargs):
+    return subprocess.run(args, check=True, **kwargs)
+
+
+def download(url, path):
+    run("curl", "--fail", "--silent", "--show-error", "--location",
+        "--retry", "3", "--connect-timeout", "15", "--max-time", "1800",
+        "--proto", "=https", "--proto-redir", "=https", "--output", str(path), url)
+
+
+def version_tuple(version):
+    if not re.fullmatch(r"\d+\.\d+\.\d+", version):
+        raise ValueError(f"Unexpected Claude release version: {version!r}")
+    return tuple(map(int, version.split(".")))
+
+
+def bundle_version(app):
+    info = app / "Contents/Info.plist"
+    if not info.is_file():
+        return None
+    with info.open("rb") as file:
+        return plistlib.load(file)["CFBundleShortVersionString"]
+
+
+def processes(executable):
+    """PIDs whose executable is exactly the given path (pgrep cannot see GUI apps from every session)."""
+    listing = run("ps", "-axo", "pid=,comm=", capture_output=True, text=True).stdout
+    pids = []
+    for line in listing.splitlines():
+        pid, _, command = line.strip().partition(" ")
+        if command.strip() == str(executable):
+            pids.append(int(pid))
+    return pids
+
+
+def wait_until_gone(executable, timeout):
+    deadline = time.monotonic() + timeout
+    while processes(executable):
+        if time.monotonic() > deadline:
+            return False
+        time.sleep(1)
+    return True
+
+
+def quit_app(app):
+    executable = app / "Contents/MacOS" / BUNDLE_EXECUTABLE
+    if not processes(executable):
+        return False
+    print("Quitting Claude…", flush=True)
+    # Apple events need a GUI session and automation consent, so fall back to SIGTERM.
+    subprocess.run(["osascript", "-e", f'tell application id "{BUNDLE_ID}" to quit'],
+                   capture_output=True, timeout=30)
+    if not wait_until_gone(executable, 30):
+        for pid in processes(executable):
+            try:
+                os.kill(pid, signal.SIGTERM)
+            except ProcessLookupError:
+                pass
+        if not wait_until_gone(executable, 30):
+            raise RuntimeError("Claude did not quit; leaving the installed app untouched")
+    # The app may have queued its own update: let Squirrel's ShipIt finish before touching the bundle.
+    shipit = app / "Contents/Frameworks/Squirrel.framework/Resources/ShipIt"
+    if processes(shipit):
+        print("Waiting for the app's own pending update to finish…", flush=True)
+        if not wait_until_gone(shipit, 300):
+            raise RuntimeError("Squirrel ShipIt is still running; leaving the installed app untouched")
+    return True
+
+
+def verify(app, version):
+    if bundle_version(app) != version:
+        raise ValueError("Downloaded bundle does not report the advertised version")
+    run("codesign", "--verify", "--deep", "--strict", "--requirement=" + REQUIREMENT, str(app))
+    run("spctl", "--assess", "--type", "execute", str(app))
+
+
+def upgrade(app, relaunch, check_only):
+    app.parent.mkdir(parents=True, exist_ok=True)
+    # Keep concurrent runs from replacing the same installation.
+    with (Path.home() / "Library/Caches" / ".upgrade-claude-desktop.lock").open("a") as lock:
+        fcntl.flock(lock, fcntl.LOCK_EX)
+        # Stage beside the app so the final swap is a same-volume rename.
+        with tempfile.TemporaryDirectory(prefix=".claude-upgrade-", dir=app.parent) as tmp:
+            work = Path(tmp)
+            metadata = work / "RELEASES.json"
+            download(FEED, metadata)
+            feed = json.loads(metadata.read_text())
+            version = feed["currentRelease"]
+            latest = version_tuple(version)
+            release = next(r for r in feed["releases"] if r["version"] == version)
+            url = release["updateTo"]["url"]
+            if not re.fullmatch(re.escape(RELEASES + version + "/") + r"Claude-[0-9a-f]{40}\.zip", url):
+                raise ValueError(f"Unexpected Claude release download URL: {url}")
+
+            installed = bundle_version(app)
+            if installed and version_tuple(installed) >= latest:
+                print(f"Claude {installed}: already up to date.")
+                return
+
+            print(f"Downloading Claude {version} (installed: {installed or 'none'})…", flush=True)
+            archive = work / url.rsplit("/", 1)[1]
+            download(url, archive)
+            extracted = work / "extracted"
+            extracted.mkdir()
+            # ditto keeps the extended attributes the code signature covers.
+            run("ditto", "-x", "-k", str(archive), str(extracted))
+            staged = extracted / "Claude.app"
+            if not staged.is_dir():
+                raise ValueError("Release archive does not contain Claude.app")
+            archive.unlink()
+            verify(staged, version)
+            print(f"Claude {version}: signature and notarization verified.", flush=True)
+            if check_only:
+                return
+
+            was_running = quit_app(app)
+            if bundle_version(app) == version:
+                print(f"Claude {version}: installed by the app's own pending update.")
+            else:
+                backup = work / "previous"
+                had_previous = app.exists()
+                if had_previous:
+                    app.rename(backup)
+                try:
+                    staged.rename(app)
+                except BaseException:
+                    if had_previous:
+                        backup.rename(app)
+                    raise
+                print(f"Claude {version}: installed.")
+            if was_running and relaunch:
+                # Only works when the user has a GUI session; not fatal on a headless box.
+                launched = subprocess.run(["open", "-g", "-a", str(app)], capture_output=True, text=True)
+                if launched.returncode == 0:
+                    print("Claude relaunched.")
+                else:
+                    print(f"Claude was not relaunched: {launched.stderr.strip()}", file=sys.stderr)
+
+
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
+    parser.add_argument("--app", type=Path, default=Path("/Applications/Claude.app"))
+    parser.add_argument("--no-relaunch", action="store_true", help="leave Claude closed after installing")
+    parser.add_argument("--check", action="store_true", help="download and verify the release without installing it")
+    args = parser.parse_args()
+    try:
+        upgrade(args.app.expanduser().absolute(), not args.no_relaunch, args.check)
+    except (OSError, ValueError, KeyError, StopIteration, RuntimeError,
+            subprocess.CalledProcessError, subprocess.TimeoutExpired) as error:
+        print(f"Claude update failed: {error}", file=sys.stderr)
+        sys.exit(1)

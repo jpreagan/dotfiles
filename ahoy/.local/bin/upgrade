@@ -29,7 +29,10 @@ npm update -g
 # codex cli
 codex update
 
-# claude
+# claude desktop
+"$HOME/.local/bin/upgrade-claude-desktop"
+
+# claude code
 claude update
 
 # pi
