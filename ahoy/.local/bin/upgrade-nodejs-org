@@ -9,7 +9,6 @@ die() { echo "upgrade-nodejs-org: $*" >&2; exit 2; }
 base="https://nodejs.org/dist"
 installed="$(/usr/local/bin/node --version)"
 
-# Match upgrade-python-org: follow the latest stable release, including new majors.
 latest="$(
   curl -fsSL "${base}/index.json" | /usr/local/bin/node -e '
     let data = "";
@@ -18,6 +17,7 @@ latest="$(
     process.stdin.on("end", () => {
       const releases = JSON.parse(data).filter(release =>
         /^v\d+\.\d+\.\d+$/.test(release.version) &&
+        release.lts &&
         release.files.includes("osx-x64-pkg"));
       releases.sort((a, b) => {
         const av = a.version.slice(1).split(".").map(Number);
